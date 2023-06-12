@@ -9,33 +9,7 @@
       </attributs>
       <methodes>
         <methode>
-          <name typeR="void" visibility="public">VerifyMaterials</name>
-          <parametres />
-        </methode>
-      </methodes>
-    </classe>
-    <classe name="University" visibility="public">
-      <attributs>
-        <attribut>
-          <name type="String" visibility="private">universityName</name>
-        </attribut>
-      </attributs>
-      <methodes>
-        <methode>
-          <name typeR="void" visibility="public">Costs</name>
-          <parametres />
-        </methode>
-      </methodes>
-    </classe>
-    <classe name="Student" visibility="public">
-      <attributs>
-        <attribut>
-          <name type="String" visibility="private">studentId</name>
-        </attribut>
-      </attributs>
-      <methodes>
-        <methode>
-          <name typeR="void" visibility="public">CalculateResults</name>
+          <name typeR="String" visibility="public">getRoomNumber</name>
           <parametres />
         </methode>
       </methodes>
@@ -48,7 +22,33 @@
       </attributs>
       <methodes>
         <methode>
-          <name typeR="void" visibility="public">CoursSessions</name>
+          <name typeR="String" visibility="public">getCoursName</name>
+          <parametres />
+        </methode>
+      </methodes>
+    </classe>
+    <classe name="University" visibility="public">
+      <attributs>
+        <attribut>
+          <name type="String" visibility="private">universityName</name>
+        </attribut>
+      </attributs>
+      <methodes>
+        <methode>
+          <name typeR="String" visibility="public">getUnivName</name>
+          <parametres />
+        </methode>
+      </methodes>
+    </classe>
+    <classe name="Departements" visibility="public">
+      <attributs>
+        <attribut>
+          <name type="String" visibility="private">departementId</name>
+        </attribut>
+      </attributs>
+      <methodes>
+        <methode>
+          <name typeR="String" visibility="public">getDeptId</name>
           <parametres />
         </methode>
       </methodes>
@@ -61,7 +61,7 @@
       </attributs>
       <methodes>
         <methode>
-          <name typeR="void" visibility="public">CalculeSalaire</name>
+          <name typeR="String" visibility="public">getTeacherId</name>
           <parametres />
         </methode>
       </methodes>
@@ -77,20 +77,24 @@
       </attributs>
       <methodes>
         <methode>
-          <name typeR="void" visibility="public">Introduce</name>
+          <name typeR="String" visibility="public">getName</name>
+          <parametres />
+        </methode>
+        <methode>
+          <name typeR="int" visibility="public">getAge</name>
           <parametres />
         </methode>
       </methodes>
     </classe>
-    <classe name="Departments" visibility="public">
+    <classe name="Student" visibility="public">
       <attributs>
         <attribut>
-          <name type="int" visibility="private">deptId</name>
+          <name type="String" visibility="private">studentId</name>
         </attribut>
       </attributs>
       <methodes>
         <methode>
-          <name typeR="void" visibility="public">getPersonnel</name>
+          <name typeR="String" visibility="public">getStudentId</name>
           <parametres />
         </methode>
       </methodes>
@@ -140,7 +144,7 @@
       <name />
       <classD multiplicity="">University</classD>
       <classD multiplicity="">University</classD>
-      <classA multiplicity="">Departments</classA>
+      <classA multiplicity="">Departements</classA>
     </association>
   </associations>
 </diagrammeClasse>

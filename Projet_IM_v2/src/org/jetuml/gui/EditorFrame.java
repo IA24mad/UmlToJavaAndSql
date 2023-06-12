@@ -682,8 +682,15 @@ public class EditorFrame extends BorderPane
             String DepartClasse = currentAssociation.getChild("classD").getText();
             String ArraivalClasse = currentAssociation.getChild("classA").getText();
             String ArraivalClasseMultiplicity =  currentAssociation.getChild("classA").getAttribute("multiplicity").getValue();
-            associList.add(new ClassesRelation(AssociationType, AssociationName, DepartClasse, ArraivalClasse,ArraivalClasseMultiplicity));
-        }
+            
+            if(AssociationType.equals("Aggregation")) {
+            String Genre = currentAssociation.getAttribute("genre").getValue();
+            associList.add(new ClassesRelation(AssociationType, AssociationName, DepartClasse, ArraivalClasse,ArraivalClasseMultiplicity,Genre));
+            }
+            else {
+            	associList.add(new ClassesRelation(AssociationType, AssociationName, DepartClasse, ArraivalClasse,ArraivalClasseMultiplicity,""));
+            }
+            }
 		
 		//This list will hold all the attributes elements of each classe
 		List<Element> attributesList;
@@ -702,9 +709,11 @@ public class EditorFrame extends BorderPane
 		//This will hold the constrecteur code
 		StringBuilder Constrecteur = new StringBuilder();
 		
+		StringBuilder SettersGetters = new StringBuilder();
+		
 		//This is for defining if the departClasse has an assosiation with multiple object of the Arraival classe
 		boolean ClasseMultipliciy = false;
-		boolean Extended = false;
+		
 		StringBuilder SQL = new StringBuilder();
 		
 		//Loop over all the classes
@@ -716,7 +725,7 @@ public class EditorFrame extends BorderPane
 			String SuperClasse = "";
 			StringBuilder code = new StringBuilder();
 			
-			
+			boolean Extended = false;
 			boolean IsIN = false;
 			
 			//Get the classes of the classes element
@@ -736,11 +745,11 @@ public class EditorFrame extends BorderPane
 				if(name.getValue().equals(relationElement.getDepartClasse())){
 					IsIN = true;
 					if(relationElement.getRelationType().equals("Generalization")){
+						Extended = true;
 						code.append("package org.jetuml.aGenerateJava.Diagram_"+repl22+";\n");
 						code.append("\nimport java.util.*;\n");
 						code.append(visibility.getValue() +" class "+name.getValue()+" extends "+relationElement.getArraivalClasse()+" {\n\n\t//Attributes \n");
 						SuperClasse = relationElement.getArraivalClasse();
-						Extended = true;
 						if(!CreatedTables.contains(relationElement.getArraivalClasse())) {
 						SQL.append("\nCREATE TABLE "+relationElement.getArraivalClasse()+" (\n"
 								+ "\tID NUMBER PRIMARY KEY \n);\n\n");
@@ -779,9 +788,8 @@ public class EditorFrame extends BorderPane
 				if(relationElement.getArraivalClasseMultiplicity().equals("*") || relationElement.getArraivalClasseMultiplicity().equals("0..*") || relationElement.getArraivalClasseMultiplicity().equals("1..*"))
 					ClasseMultipliciy = true;
 				else ClasseMultipliciy = false;
-			//System.out.println("Avant Aggr"+SQL);
-			//System.out.println("After");
-			if(relationElement.getRelationType().equals("Aggregation") && ClasseMultipliciy == true){
+
+			if(relationElement.getRelationType().equals("Aggregation") && relationElement.getGenre().equals("Aggregation") && ClasseMultipliciy == true){
 				code.append("\tprivate List<"+relationElement.getArraivalClasse()+"> "+relationElement.getArraivalClasse().toLowerCase()+";\n");
 				associationList.add(relationElement.getArraivalClasse());
 				associationList.add(relationElement.getArraivalClasseMultiplicity());
@@ -807,18 +815,19 @@ public class EditorFrame extends BorderPane
 					SQL.append("\nALTER TABLE "+relationElement.getDepartClasse()+"\n"
 							+ "ADD fk_"+relationElement.getArraivalClasse()+" NUMBER;\n\n");
 					SQL.append("ALTER TABLE "+relationElement.getDepartClasse()+"\n"
-							+ "ADD FOREIGN KEY (fk_"+relationElement.getArraivalClasse()+") \n"
-									+ "REFERENCES "+relationElement.getArraivalClasse()+" (ID) ON DELETE SET NULL;");
+							+ "ADD CONSTRAINT FOREIGN KEY (fk_"+relationElement.getArraivalClasse()+") \n"
+									+ "REFERENCES "+relationElement.getArraivalClasse()+" (ID) ON DELETE SET NULL;\n");
 				}
 				
 				
 			}
-			else if(relationElement.getRelationType().equals("Aggregation") && ClasseMultipliciy == false) {
+			else if(relationElement.getRelationType().equals("Aggregation") && relationElement.getGenre().equals("Aggregation") && ClasseMultipliciy == false) {
 				code.append("\tprivate "+relationElement.getArraivalClasse()+" "+relationElement.getArraivalClasse().toLowerCase()+";\n");
 				associationList.add(relationElement.getArraivalClasse());
 				associationList.add(relationElement.getArraivalClasseMultiplicity());
 				Aggr.append("\t\tthis."+relationElement.getArraivalClasse().toLowerCase()+" = "+relationElement.getArraivalClasse().toLowerCase()+";\n");
 				
+					
 				if(!CreatedTables.contains(relationElement.getArraivalClasse())) {
 					SQL.append("\nCREATE TABLE "+relationElement.getArraivalClasse()+"(\n"
 							+ "ID NUMBER PRIMARY KEY\n"
@@ -839,12 +848,13 @@ public class EditorFrame extends BorderPane
 					SQL.append("\nALTER TABLE "+relationElement.getDepartClasse()+"\n"
 							+ "ADD fk_"+relationElement.getArraivalClasse()+" NUMBER;\n\n");
 					SQL.append("ALTER TABLE "+relationElement.getDepartClasse()+"\n"
-							+ "ADD FOREIGN KEY (fk_"+relationElement.getArraivalClasse()+") \n"
+							+ "ADD CONSTRAINT FOREIGN KEY (fk_"+relationElement.getArraivalClasse()+") \n"
 									+ "REFERENCES "+relationElement.getArraivalClasse()+" (ID) ON DELETE SET NULL;");
 				}
 				
+				
 				}
-			else if(relationElement.getRelationType().equals("Composition")) {
+			else if(relationElement.getRelationType().equals("Aggregation") && relationElement.getGenre().equals("Composition")) {
 				if(ClasseMultipliciy) {
 					code.append("\tprivate List<"+relationElement.getArraivalClasse()+"> "+relationElement.getArraivalClasse().toLowerCase()+";\n");
 					Compo.append("\t\tthis."+relationElement.getArraivalClasse().toLowerCase()+" = new Arraylist<"+relationElement.getArraivalClasse()+">;\n");
@@ -853,6 +863,8 @@ public class EditorFrame extends BorderPane
 					code.append("\tprivate "+relationElement.getArraivalClasse()+" "+relationElement.getArraivalClasse().toLowerCase()+";\n");
 					Compo.append("\t\tthis."+relationElement.getArraivalClasse().toLowerCase()+" = new "+relationElement.getArraivalClasse()+"();\n");
 				}
+				
+				
 				
 				if(!CreatedTables.contains(relationElement.getArraivalClasse())) {
 					SQL.append("\nCREATE TABLE "+relationElement.getArraivalClasse()+"(\n"
@@ -874,9 +886,10 @@ public class EditorFrame extends BorderPane
 					SQL.append("\nALTER TABLE "+relationElement.getDepartClasse()+"\n"
 							+ "ADD fk_"+relationElement.getArraivalClasse()+" NUMBER;\n\n");
 					SQL.append("ALTER TABLE "+relationElement.getDepartClasse()+"\n"
-							+ "ADD FOREIGN KEY (fk_"+relationElement.getArraivalClasse()+") \n"
+							+ "ADD CONSTRAINT FOREIGN KEY (fk_"+relationElement.getArraivalClasse()+") \n"
 									+ "REFERENCES "+relationElement.getArraivalClasse()+" (ID) ON DELETE CASCADE;");
 				}
+				
 				
 			}
 			}
@@ -945,13 +958,21 @@ public class EditorFrame extends BorderPane
 			}
 			
 			//We start defining the constrecteur in diffrente cases
-			Constrecteur.append("\n\t//Constrecteur\n\tpublic "+name.getValue()+"(");
+			
+			Constrecteur.append("\tpublic "+name.getValue()+"(");
 			for(int j=0; j<attributesList.size(); j++) {
 				Element attr = attributesList.get(j);
 				Element attName = attr.getChild("name");
 				Attribute attVisibility = attName.getAttribute("visibility");
 				Attribute atttype = attName.getAttribute("type");
 				code.append("\t"+attVisibility.getValue()+" "+atttype.getValue()+" "+attr.getChildText("name")+";\n");
+				
+				SettersGetters.append("\n\tpublic void Set"+attr.getChildText("name")+"("+atttype.getValue()+" "+attr.getChildText("name")+"){\n"
+						+ "\tthis."+attr.getChildText("name")+" = "+attr.getChildText("name")+";\n\t}\n");
+				
+				SettersGetters.append("\n\tpublic "+atttype.getValue()+" get"+attr.getChildText("name")+"(){\n"
+						+ "\t\treturn "+attr.getChildText("name")+";\n\t}\n");
+				
 				if(j!=attributesList.size()-1) Constrecteur.append(atttype.getValue()+" "+attr.getChildText("name")+", ");
 				else {
 					Constrecteur.append(atttype.getValue()+" "+attr.getChildText("name"));
@@ -1030,8 +1051,11 @@ public class EditorFrame extends BorderPane
 			
 			
 			//We start defining the methodes in each classe
+			code.append("\n\t//Constrecteur\n\tpublic "+name.getValue()+"(){}\n");
 			Constrecteur.append("\t}\n\n\t//methodes");
 			code.append(Constrecteur);
+			code.append(SettersGetters);
+			SettersGetters = new StringBuilder();
 			Constrecteur = new StringBuilder();
 			ConstAttributes.clear();
 			
@@ -1084,17 +1108,23 @@ public class EditorFrame extends BorderPane
 		private String DepartClasse;
 		private String ArraivalClasse;
 		private String ArraivalClasseMultiplicity;
+		private String RelationGenre;
 		
-		public ClassesRelation(String RelationType,String RelationName,String DepartClasse,String ArraivalClasse,String ArraivalClasseMultiplicity) {
+		public ClassesRelation(String RelationType,String RelationName,String DepartClasse,String ArraivalClasse,String ArraivalClasseMultiplicity, String RelationGenre) {
 			this.RelationType = RelationType;
 			this.RelationName = RelationName;
 			this.DepartClasse = DepartClasse;
 			this.ArraivalClasse = ArraivalClasse;
 			this.ArraivalClasseMultiplicity = ArraivalClasseMultiplicity;
+			this.RelationGenre = RelationGenre;
 		}
 
 		public String getRelationType() {
 			return RelationType;
+		}
+		
+		public String getGenre() {
+			return RelationGenre;
 		}
 		
 		public void setRelationType(String relationType) {

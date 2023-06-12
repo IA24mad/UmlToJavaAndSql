@@ -1,24 +1,85 @@
 
-CREATE TABLE Professeur(
+CREATE TABLE ClassRoom(
 ID NUMBER PRIMARY KEY
 );
 
 
-ALTER TABLE Professeur
+ALTER TABLE ClassRoom
 	ADD (
-nom VARCHAR,
-codeP VARCHAR
+roomNumber VARCHAR
 );
 
-CREATE TABLE Etudiant(
+CREATE TABLE University(
 ID NUMBER PRIMARY KEY,
-id_Professeur NUMBER,
-FOREIGN KEY (id_Professeur) REFRENCES Professeur(ID) ON DELETE SET NULL
+id_ClassRoom NUMBER,
+FOREIGN KEY (id_ClassRoom) REFRENCES ClassRoom(ID) ON DELETE CASCADE
 );
 
 
-ALTER TABLE Etudiant
+CREATE TABLE Departments(
+ID NUMBER PRIMARY KEY
+);
+
+
+ALTER TABLE University
+ADD fk_Departments NUMBER;
+
+ALTER TABLE University
+ADD CONSTRAINT FOREIGN KEY (fk_Departments) 
+REFERENCES Departments (ID) ON DELETE CASCADE;
+ALTER TABLE University
+	ADD (
+universityName VARCHAR
+);
+
+CREATE TABLE Person (
+	ID NUMBER PRIMARY KEY 
+);
+
+
+CREATE TABLE Student (
+	ID NUMBER PRIMARY KEY,
+	id_Person NUMBER,
+	FOREIGN KEY (id_Person) REFERENCES Person(ID)
+);
+
+
+ALTER TABLE Student
+	ADD (
+studentId VARCHAR
+);
+
+CREATE TABLE Cours(
+ID NUMBER PRIMARY KEY,
+id_ClassRoom NUMBER,
+FOREIGN KEY (id_ClassRoom) REFRENCES ClassRoom(ID) ON DELETE SET NULL
+);
+
+
+ALTER TABLE Cours
+	ADD (
+coursName VARCHAR
+);
+
+CREATE TABLE Teacher (
+	ID NUMBER PRIMARY KEY,
+	id_Person NUMBER,
+	FOREIGN KEY (id_Person) REFERENCES Person(ID)
+);
+
+
+ALTER TABLE Teacher
+	ADD (
+teacher_id VARCHAR
+);
+
+ALTER TABLE Person
 	ADD (
 nom VARCHAR,
 age NUMBER
+);
+
+ALTER TABLE Departments
+	ADD (
+deptId NUMBER
 );
